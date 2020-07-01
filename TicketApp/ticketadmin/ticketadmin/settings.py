@@ -25,7 +25,7 @@ SECRET_KEY = 'n6p6@o&75rb%!!m1_3%u1@(@vb#3@183_dxncw@abyr)z8+9vi'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'ticketapi',
-    'rest_framework'
+    'rest_framework',
+   
 ]
 
 MIDDLEWARE = [
@@ -49,6 +50,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
+   
 ]
 
 ROOT_URLCONF = 'ticketadmin.urls'
@@ -131,3 +134,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+AUTH_KEY = 'Woohoo'
