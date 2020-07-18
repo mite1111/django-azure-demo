@@ -1,31 +1,21 @@
 from rest_framework import serializers
-from .models import ticketDetails
-from rest_framework.decorators import api_view
-from django.conf import settings
+# from django.contrib.auth.models import User
+from .models import TicketDetails
 
-# @api_view(['POST'])
-
-
-class ticketDetailsSerializer(serializers.ModelSerializer):
+# PostTicket Serializer
+class PostTicketSerializer(serializers.ModelSerializer):
+    auth_key = serializers.CharField(write_only=True)
+    
     class Meta:
-        model = ticketDetails
-        fields = '__all__'    
+        model = TicketDetails
+        fields = '__all__'
 
-    # def validate_Auth_Key(self, value):
-    #     if 'woohoo' not in value.lower():
-    #         raise serializers.ValidationError("Incorrect Auth_key")
-    #     return value
+# EditTicket Serializer
+class EditTicketSerializer(serializers.ModelSerializer):
+    auth_key = serializers.CharField(write_only=True)
+    ticket_id = serializers.CharField(write_only=True)
+    
+    class Meta:
+        model = TicketDetails
+        fields = '__all__'
 
-    def validate_Auth_Key(self, value):
-        if value != settings.AUTH_KEY:
-            raise serializers.ValidationError("Incorrect Auth_key")
-        return value
-    # def create(self, validated_data):
-    #     meals = validated_data.pop('meals')
-    #     instance = Order.objects.create(**validated_data)
-    #     for meal in meals:
-    #         instance.meals.add(meal)
-
-    #     return instance
-
-        
