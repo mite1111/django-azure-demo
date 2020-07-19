@@ -15,7 +15,6 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from .router import router
 from registrationapi.views import RegisterAPI
 from registrationapi.views import LoginAPI
 from registrationapi.views import ViewProfileAPI, EditProfile
@@ -23,13 +22,10 @@ from ticketapi.views import PostTicketAPI
 from ticketapi.views import GetMyTicketsAPI, GetTicketById, GetTicketByHashtag, EditTicketAPI
 from commentsapi.views import PostCommentAPI, GetCommentsByUserId, GetCommentsByTicketId
 from interestsapi.views import PostInterestAPI, GetInterestsByUserid, GetInterestsByTicketId
-# from loginapi.views import LoginAPI
-# from .views import LoginAPI
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/',include(router.urls)),
-
+    
     #profile apis
     path('api/registrationapi/', RegisterAPI.as_view(), name='registration'),
     path('api/loginapi/', LoginAPI.as_view(), name='login'),
