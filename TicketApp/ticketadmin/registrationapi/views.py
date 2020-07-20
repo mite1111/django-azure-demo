@@ -65,18 +65,24 @@ class LoginAPI(generics.GenericAPIView):
                 password = request.data['password']
 
                 cursor = connection.cursor()
-                cursor.execute("SELECT user_id, name FROM user_profile WHERE email = %s AND password = %s",[email, password])
+                cursor.execute("SELECT user_id, name, city, email, mobile FROM user_profile WHERE email = %s AND password = %s",[email, password])
                 
                 if cursor.rowcount >= 1:
                     rows = cursor.fetchall()
                     for row in rows:
                         user_id = row[0]
                         name = row[1]
+                        city = row[2]
+                        email = row[3]
+                        mobile = row[4]
                     auth_key = uuid.uuid1()
                     cursor.execute("UPDATE user_profile SET auth_key = %s WHERE user_id = %s",[auth_key, user_id])
                     data = {
                             'user_id': user_id,
                             'name': name,
+                            'city': city,
+                            'email': email,
+                            'mobile': mobile,
                             'auth_key': auth_key
                             }
                     return Response(data)

@@ -19,7 +19,7 @@ from registrationapi.views import RegisterAPI
 from registrationapi.views import LoginAPI
 from registrationapi.views import ViewProfileAPI, EditProfile
 from ticketapi.views import PostTicketAPI
-from ticketapi.views import GetMyTicketsAPI, GetTicketById, GetTicketByHashtag, EditTicketAPI
+from ticketapi.views import GetMyTicketsAPI, GetTicketById, GetTicketByHashtag,GetFewTicketByHashtag, EditTicketAPI
 from commentsapi.views import PostCommentAPI, GetCommentsByUserId, GetCommentsByTicketId
 from interestsapi.views import PostInterestAPI, GetInterestsByUserid, GetInterestsByTicketId
 
@@ -36,6 +36,7 @@ urlpatterns = [
     path('api/getmyticketsapi/', GetMyTicketsAPI.as_view()),
     path('api/getticketbyidapi/', GetTicketById.as_view()),
     path('api/getticketbyhashtagapi/', GetTicketByHashtag.as_view()),
+    path('api/getfewticketbyhashtagapi/', GetFewTicketByHashtag.as_view()),
     path('api/editticketapi/', EditTicketAPI.as_view()),
     #comments apis
     path('api/postcommentapi/', PostCommentAPI.as_view()),
