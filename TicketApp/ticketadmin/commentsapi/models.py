@@ -5,7 +5,7 @@ from django.db.models import DateTimeField
 class AllComments(models.Model):
     cid = models.AutoField(primary_key=True)
     ticket_id = models.IntegerField()
-    user_id = models.CharField(max_length = 100, blank=True, default='')
+    user_id = models.IntegerField()
     comment_text = models.CharField(max_length = 200,blank=True, default='')
     dateupdated = models.DateTimeField(auto_now=True)
 
