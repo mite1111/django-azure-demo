@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from registrationapi.views import RegisterAPI
 from registrationapi.views import LoginAPI
-from registrationapi.views import ViewProfileAPI, EditProfile
+from registrationapi.views import ViewProfileAPI, EditProfile, ChangePassword
 from ticketapi.views import PostTicketAPI
 from ticketapi.views import GetMyTicketsAPI, GetTicketById, GetTicketByHashtag,GetFewTicketByHashtag, EditTicketAPI
 from commentsapi.views import PostCommentAPI, GetCommentsByUserId, GetCommentsByTicketId
@@ -31,6 +31,7 @@ urlpatterns = [
     path('api/loginapi/', LoginAPI.as_view(), name='login'),
     path('api/viewprofileapi/', ViewProfileAPI.as_view()),
     path('api/editprofileapi/', EditProfile.as_view()),
+    path('api/changepasswordapi/', ChangePassword.as_view()),
     #ticket apis
     path('api/postticketapi/', PostTicketAPI.as_view()),
     path('api/getmyticketsapi/', GetMyTicketsAPI.as_view()),

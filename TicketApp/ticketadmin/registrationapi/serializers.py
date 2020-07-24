@@ -28,4 +28,12 @@ class ViewProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ('uname')
+
+# ChangePassword Serializer
+class ChangePasswordSerializer(serializers.ModelSerializer):
+    old_password = serializers.CharField(write_only=True)
+    user_id = serializers.CharField(write_only=True)
+    class Meta:
+        model = UserProfile
+        fields = ('user_id','auth_key','old_password','password')
         

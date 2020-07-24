@@ -2,7 +2,7 @@ from rest_framework import generics, permissions
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import UserSerializer, RegisterSerializer, LoginSerializer, ViewProfileSerializer
+from .serializers import UserSerializer, RegisterSerializer, LoginSerializer, ViewProfileSerializer, ChangePasswordSerializer
 from django.db import connection
 from django.http import HttpResponse
 import random
@@ -168,3 +168,37 @@ class EditProfile(generics.GenericAPIView):
                 return Response(data)
             else:
                 return Response({"response":"Error while updating user info"})
+
+
+# ChangePassword API
+class ChangePassword(generics.GenericAPIView):
+    serializer_class = ChangePasswordSerializer
+
+    def post(self, request):
+        if request.method == "POST":
+            user_id = request.data['user_id']
+            auth_key = request.data['auth_key']
+            old_password = request.data['old_password']
+            password = request.data['password']
+
+            dateupdated = str(datetime.utcnow())
+            
+            cursor = connection.cursor()
+            cursor.execute("SELECT user_id FROM user_profile WHERE user_id = %s and auth_key = %s",[user_id, auth_key])
+            #cursor.execute("INSERT INTO user_profile(name,email,password,preference,profile_type,mobile,city,state,country,subscription_type,datecreated,dateupdated,auth_key) values(%s , %s ,%s , %s ,%s , %s ,%s , %s ,%s , %s ,%s , %s ,%s) RETURNING user_id",[name, email, password, preference, profile_type, mobile, city, state, country, subscription_type, datecreated, dateupdated, auth_key])
+            
+            if cursor.rowcount >= 1:
+                cursor.execute("SELECT user_id FROM user_profile WHERE user_id = %s and password = %s",[user_id, old_password])
+                if cursor.rowcount >= 1:
+                    cursor.execute("UPDATE user_profile SET password = %s, dateupdated = %s WHERE user_id = %s RETURNING user_id",[password,dateupdated,user_id])
+                    rows = cursor.fetchall()
+                    for row in rows:
+                        user_id = row[0]
+                    data = {
+                            'user_id': user_id
+                            }
+                    return Response(data)
+                else:
+                    return Response({"response":"Incorrect Old Password"})
+            else:
+                return Response({"response":"Error while updating User Password"})
