@@ -96,11 +96,11 @@ class GetCommentsByTicketId(APIView):
             cursor.execute("SELECT user_id FROM user_profile WHERE user_id = %s and auth_key = %s",[user_id, auth_key])
 
             if cursor.rowcount >= 1:
-                cursor.execute("SELECT cid,ticket_id,user_id,comment_text,dateupdated FROM allcomments WHERE ticket_id = %s",[ticket_id])
+                cursor.execute("SELECT ac.cid, ac.ticket_id, ac.user_id, ac.comment_text, ac.dateupdated, up.name FROM allcomments ac INNER JOIN user_profile up on ac.user_id = up.user_id WHERE ticket_id = %s",[ticket_id])
                 rows = cursor.fetchall()
                 rowarray_list = []
                 for row in rows:
-                    t = (row[0], row[1], row[2], row[3], str(row[4]))
+                    t = (row[0], row[1], row[2], row[3], str(row[4]), row[5])
                     rowarray_list.append(t)
                 j = json.dumps(rowarray_list)
                 
@@ -113,6 +113,7 @@ class GetCommentsByTicketId(APIView):
                     d['user_id'] = row[2]
                     d['comment_text'] = row[3]
                     d['dateupdated'] = str(row[4])
+                    d['name'] = row[5]
                     objects_list.append(d)
 
                 j = json.dumps(objects_list)

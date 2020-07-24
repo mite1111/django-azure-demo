@@ -96,11 +96,11 @@ class GetInterestsByTicketId(APIView):
             cursor.execute("SELECT user_id FROM user_profile WHERE user_id = %s and auth_key = %s",[user_id, auth_key])
 
             if cursor.rowcount >= 1:
-                cursor.execute("SELECT intid,ticket_id,user_id,dateupdated FROM allinterests WHERE ticket_id = %s",[ticket_id])
+                cursor.execute("SELECT ai.intid, ai.ticket_id, ai.user_id, ai.dateupdated, up.name FROM allinterests ai INNER JOIN user_profile up on ai.user_id = up.user_id WHERE ticket_id = %s",[ticket_id])
                 rows = cursor.fetchall()
                 rowarray_list = []
                 for row in rows:
-                    t = (row[0], row[1], row[2],str(row[3]))
+                    t = (row[0], row[1], row[2],str(row[3]),row[4])
                     rowarray_list.append(t)
                 j = json.dumps(rowarray_list)
                 
@@ -112,6 +112,7 @@ class GetInterestsByTicketId(APIView):
                     d['ticket_id'] = row[1]
                     d['user_id'] = row[2]
                     d['dateupdated'] = str(row[3])
+                    d['name'] = row[4]
                     objects_list.append(d)
 
                 j = json.dumps(objects_list)
