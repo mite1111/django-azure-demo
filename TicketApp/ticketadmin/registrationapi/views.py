@@ -144,7 +144,6 @@ class EditProfile(generics.GenericAPIView):
             auth_key = request.data['auth_key']
             name = request.data['name']
             email = request.data['email']
-            password = request.data['password']
             preference = request.data['preference']
             profile_type = request.data['profile_type']
             mobile = request.data['mobile']
@@ -159,7 +158,7 @@ class EditProfile(generics.GenericAPIView):
             #cursor.execute("INSERT INTO user_profile(name,email,password,preference,profile_type,mobile,city,state,country,subscription_type,datecreated,dateupdated,auth_key) values(%s , %s ,%s , %s ,%s , %s ,%s , %s ,%s , %s ,%s , %s ,%s) RETURNING user_id",[name, email, password, preference, profile_type, mobile, city, state, country, subscription_type, datecreated, dateupdated, auth_key])
             
             if cursor.rowcount >= 1:
-                cursor.execute("UPDATE user_profile SET name = %s, email = %s, password = %s, preference = %s, profile_type = %s, mobile = %s, city = %s, state = %s, country = %s, subscription_type = %s, dateupdated = %s WHERE user_id = %s RETURNING user_id",[name, email, password, preference, profile_type, mobile, city, state, country, subscription_type, dateupdated, user_id])
+                cursor.execute("UPDATE user_profile SET name = %s, email = %s, preference = %s, profile_type = %s, mobile = %s, city = %s, state = %s, country = %s, subscription_type = %s, dateupdated = %s WHERE user_id = %s RETURNING user_id",[name, email, preference, profile_type, mobile, city, state, country, subscription_type, dateupdated, user_id])
                 rows = cursor.fetchall()
                 for row in rows:
                     user_id = row[0]
