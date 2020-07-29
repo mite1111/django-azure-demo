@@ -70,7 +70,7 @@ class GetCommentsByUserId(APIView):
                     d['ticket_id'] = row[1]
                     d['user_id'] = row[2]
                     d['comment_text'] = row[3]
-                    d['dateupdated'] = str(row[4])
+                    d['dateupdated'] = str(row[4].strftime('%Y-%m-%d %H:%M:%S'))
                     objects_list.append(d)
 
                 j = json.dumps(objects_list)
@@ -112,7 +112,7 @@ class GetCommentsByTicketId(APIView):
                     d['ticket_id'] = row[1]
                     d['user_id'] = row[2]
                     d['comment_text'] = row[3]
-                    d['dateupdated'] = str(row[4])
+                    d['dateupdated'] = str(row[4].strftime('%Y-%m-%d %H:%M:%S'))
                     d['name'] = row[5]
                     objects_list.append(d)
 

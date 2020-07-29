@@ -8,7 +8,7 @@ class TicketDetails(models.Model):
     category = models.CharField(max_length = 100)
     subcategory = models.CharField(max_length = 100, blank=True, default='')
     product = models.CharField(max_length = 100, blank=True, default='')
-    hashtag = models.CharField(max_length = 100,blank=True, default='')
+    # hashtag = models.CharField(max_length = 100,blank=True, default='')
     expiring_in_hours = models.CharField(max_length = 100, blank=True, default='')
     budget_in_rs = models.CharField(max_length = 100, blank=True, default='')
     addressline1 = models.CharField(max_length = 100, null=True, default='')
@@ -24,3 +24,23 @@ class TicketDetails(models.Model):
 
     class Meta:
         db_table = "ticket_details"
+
+class HashtagMaster(models.Model):
+    hashtag_id = models.AutoField(primary_key=True)
+    hashtag = models.CharField(max_length = 50)
+    dateupdated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "hashtag_master"
+
+class TicketHashtag(models.Model):
+    id = models.AutoField(primary_key=True)
+    hashtag_id = models.IntegerField()
+    ticket_id = models.IntegerField()
+    user_id = models.IntegerField()
+    hashtag = models.CharField(max_length = 50)
+    active = models.IntegerField()
+    dateupdated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "ticket_hashtag"

@@ -70,7 +70,7 @@ class GetInterestsByUserid(APIView):
                     d['intid'] = row[0]
                     d['ticket_id'] = row[1]
                     d['user_id'] = row[2]
-                    d['dateupdated'] = str(row[3])
+                    d['dateupdated'] = str(row[3].strftime('%Y-%m-%d %H:%M:%S'))
                     objects_list.append(d)
 
                 j = json.dumps(objects_list)
@@ -111,7 +111,7 @@ class GetInterestsByTicketId(APIView):
                     d['intid'] = row[0]
                     d['ticket_id'] = row[1]
                     d['user_id'] = row[2]
-                    d['dateupdated'] = str(row[3])
+                    d['dateupdated'] = str(row[3].strftime('%Y-%m-%d %H:%M:%S'))
                     d['name'] = row[4]
                     objects_list.append(d)
 
