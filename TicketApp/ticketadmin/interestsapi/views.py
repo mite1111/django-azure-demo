@@ -28,16 +28,19 @@ class PostInterestAPI(generics.GenericAPIView):
             cursor.execute("SELECT user_id FROM user_profile WHERE user_id = %s and auth_key = %s",[user_id, auth_key])
             
             if cursor.rowcount >= 1:
-                cursor.execute("UPDATE ticket_Details SET interests_count = (interests_count + 1) WHERE ticket_id = %s",[ticket_id])
-                cursor.execute("INSERT INTO allinterests(ticket_id,user_id,dateupdated) values(%s , %s ,%s) RETURNING intid",[ticket_id, user_id,dateupdated])
-                
-                rows = cursor.fetchall()
-                for row in rows:
-                    intid = row[0]
-                data = {
-                        'intid': intid
-                        }
-                return Response(data)
+                cursor.execute("SELECT intid FROM allinterests WHERE user_id = %s and ticket_id = %s",[user_id, ticket_id])
+                if cursor.rowcount == 0:
+                    cursor.execute("UPDATE ticket_Details SET interests_count = (interests_count + 1) WHERE ticket_id = %s",[ticket_id])
+                    cursor.execute("INSERT INTO allinterests(ticket_id,user_id,dateupdated) values(%s , %s ,%s) RETURNING intid",[ticket_id, user_id,dateupdated])
+                    rows = cursor.fetchall()
+                    for row in rows:
+                        intid = row[0]
+                    data = {
+                            'intid': intid
+                            }
+                    return Response(data)
+                else:
+                    return Response({"response":"Interest record already exists for ticket_id and user_id combination"})
             else:
                 return Response({"response":"Error saving interest"})
 

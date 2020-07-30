@@ -74,7 +74,7 @@ class GetMyTicketsAPI(APIView):
             cursor.execute("SELECT user_id FROM user_profile WHERE user_id = %s and auth_key = %s",[user_id, auth_key])
 
             if cursor.rowcount >= 1:
-                cursor.execute("SELECT ticket_id,category,subcategory,product,expiring_in_hours,budget_in_rs,scope,ticket_description,datecreated,interests_count FROM ticket_details WHERE user_id = %s",[user_id])
+                cursor.execute("SELECT ticket_id,category,subcategory,product,expiring_in_hours,budget_in_rs,scope,ticket_description,datecreated,interests_count FROM ticket_details WHERE user_id = %s ORDER BY ticket_id DESC",[user_id])
                 rows = cursor.fetchall()
                 rowarray_list = []
                 for row in rows:
@@ -284,17 +284,21 @@ class EditTicketAPI(generics.GenericAPIView):
                 rows = cursor.fetchall()
                 for row in rows:
                     ticket_id = row[0]
-                # for element in request.data['hashtag']:
-                #     cursor.execute("SELECT hashtag_id, hashtag FROM hashtag_master WHERE hashtag = %s",[element['hashtag']])
-                #     if cursor.rowcount >= 1:
-                #         rows = cursor.fetchall()
-                #         for row in rows:
-                #             cursor.execute("INSERT INTO ticket_hashtag(hashtag_id,ticket_id,user_id,hashtag,active,dateupdated) VALUES(%s , %s ,%s , %s, %s, %s)",[row[0],ticket_id,user_id,row[1],1,dateupdated])
-                #     else:
-                #         cursor.execute("INSERT INTO hashtag_master(hashtag,dateupdated) VALUES(%s, %s) RETURNING hashtag_id, hashtag",[element['hashtag'],dateupdated])
-                #         rows = cursor.fetchall()
-                #         for row in rows:
-                #             cursor.execute("INSERT INTO ticket_hashtag(hashtag_id,ticket_id,user_id,hashtag,active,dateupdated) VALUES(%s , %s ,%s , %s, %s, %s)",[row[0],ticket_id,user_id,row[1],1,dateupdated])
+                for element in request.data['hashtag']:
+                    if element['action'] == 'add':
+                        cursor.execute("SELECT hashtag_id, hashtag FROM hashtag_master WHERE hashtag = %s",[element['hashtag']])
+                        if cursor.rowcount >= 1:
+                            rows = cursor.fetchall()
+                            for row in rows:
+                                cursor.execute("INSERT INTO ticket_hashtag(hashtag_id,ticket_id,user_id,hashtag,active,dateupdated) VALUES(%s , %s ,%s , %s, %s, %s)",[row[0],ticket_id,user_id,row[1],1,dateupdated])
+                        else:
+                            cursor.execute("INSERT INTO hashtag_master(hashtag,dateupdated) VALUES(%s, %s) RETURNING hashtag_id, hashtag",[element['hashtag'],dateupdated])
+                            rows = cursor.fetchall()
+                            for row in rows:
+                                cursor.execute("INSERT INTO ticket_hashtag(hashtag_id,ticket_id,user_id,hashtag,active,dateupdated) VALUES(%s , %s ,%s , %s, %s, %s)",[row[0],ticket_id,user_id,row[1],1,dateupdated])
+                    else:
+                        cursor.execute("UPDATE ticket_hashtag SET active = 0, dateupdated = %s WHERE ticket_id = %s AND hashtag = %s",[dateupdated,ticket_id,element['hashtag']])
+                
                 data = {
                         'ticket_id': ticket_id
                         }
