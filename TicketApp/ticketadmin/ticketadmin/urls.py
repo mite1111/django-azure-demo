@@ -19,9 +19,9 @@ from registrationapi.views import RegisterAPI
 from registrationapi.views import LoginAPI
 from registrationapi.views import ViewProfileAPI, EditProfile, ChangePassword
 from ticketapi.views import PostTicketAPI
-from ticketapi.views import GetMyTicketsAPI, GetTicketById, GetTicketByHashtag,GetFewTicketByHashtag, EditTicketAPI
+from ticketapi.views import GetMyTicketsAPI, GetTicketById, GetTicketByHashtag,GetFewTicketByHashtag, EditTicketAPI, GetTicketsByMultipleHashtags
 from commentsapi.views import PostCommentAPI, GetCommentsByUserId, GetCommentsByTicketId
-from interestsapi.views import PostInterestAPI, GetInterestsByUserid, GetInterestsByTicketId
+from interestsapi.views import PostInterestAPI, GetInterestsByUserid, GetInterestsByTicketId, RemoveInterestByTicketId
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -39,6 +39,7 @@ urlpatterns = [
     path('api/getticketbyhashtagapi/', GetTicketByHashtag.as_view()),
     path('api/getfewticketbyhashtagapi/', GetFewTicketByHashtag.as_view()),
     path('api/editticketapi/', EditTicketAPI.as_view()),
+    path('api/getticketsbymultiplehashtagapi/', GetTicketsByMultipleHashtags.as_view()),
     #comments apis
     path('api/postcommentapi/', PostCommentAPI.as_view()),
     path('api/getcommentsbyuseridapi/', GetCommentsByUserId.as_view()),
@@ -46,6 +47,7 @@ urlpatterns = [
     #interests apis
     path('api/postinterestapi/', PostInterestAPI.as_view()),
     path('api/getinterestsbyuseridapi/', GetInterestsByUserid.as_view()),
-    path('api/getinterestsbyticketidapi/', GetInterestsByTicketId.as_view())
+    path('api/getinterestsbyticketidapi/', GetInterestsByTicketId.as_view()),
+    path('api/removeinterestbyticketidapi/', RemoveInterestByTicketId.as_view())
     
 ]
