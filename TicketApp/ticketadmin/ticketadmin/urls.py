@@ -17,11 +17,13 @@ from django.contrib import admin
 from django.urls import path, include
 from registrationapi.views import RegisterAPI
 from registrationapi.views import LoginAPI
-from registrationapi.views import ViewProfileAPI, EditProfile, ChangePassword
+from registrationapi.views import ViewProfileAPI, EditProfile, ChangePassword, ViewOtherProfileAPI
 from ticketapi.views import PostTicketAPI
 from ticketapi.views import GetMyTicketsAPI, GetTicketById, GetTicketByHashtag,GetFewTicketByHashtag, EditTicketAPI, GetTicketsByMultipleHashtags
 from commentsapi.views import PostCommentAPI, GetCommentsByUserId, GetCommentsByTicketId
 from interestsapi.views import PostInterestAPI, GetInterestsByUserid, GetInterestsByTicketId, RemoveInterestByTicketId
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,6 +32,7 @@ urlpatterns = [
     path('api/registrationapi/', RegisterAPI.as_view(), name='registration'),
     path('api/loginapi/', LoginAPI.as_view(), name='login'),
     path('api/viewprofileapi/', ViewProfileAPI.as_view()),
+    path('api/viewotherprofileapi/', ViewOtherProfileAPI.as_view()),
     path('api/editprofileapi/', EditProfile.as_view()),
     path('api/changepasswordapi/', ChangePassword.as_view()),
     #ticket apis
@@ -51,3 +54,6 @@ urlpatterns = [
     path('api/removeinterestbyticketidapi/', RemoveInterestByTicketId.as_view())
     
 ]
+
+if settings.DEBUG:
+  urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

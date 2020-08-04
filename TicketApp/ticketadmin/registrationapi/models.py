@@ -16,6 +16,7 @@ class UserProfile(models.Model):
     subscription_type = models.CharField(max_length = 20, blank=True, default='Free')
     auth_key = models.CharField(max_length = 40, blank=True, default='')
     no_of_tickets_posted = models.IntegerField(default=0)
+    profile_picture = models.ImageField(blank=True, null=True,max_length = 300)
     datecreated = models.DateTimeField(auto_now_add=True)
     dateupdated = models.DateTimeField(auto_now=True)
 

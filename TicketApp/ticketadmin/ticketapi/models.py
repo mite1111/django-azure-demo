@@ -20,6 +20,7 @@ class TicketDetails(models.Model):
     ticket_description = models.CharField(max_length = 200, blank=True, default='')
     interests_count = models.IntegerField(default=0)
     ticket_type = models.CharField(max_length = 20, blank=True, default='')
+    ticket_picture = models.ImageField(blank=True, null=True,max_length = 300)
     datecreated = models.DateTimeField(auto_now_add=True)
     dateupdated = models.DateTimeField(auto_now=True)
 

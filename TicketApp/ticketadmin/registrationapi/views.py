@@ -12,6 +12,9 @@ from datetime import datetime, date
 from django.http import JsonResponse
 from django.db import IntegrityError
 from dateutil import relativedelta
+# from .models import UserProfile
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 # Register API
 class RegisterAPI(generics.GenericAPIView):
@@ -43,10 +46,21 @@ class RegisterAPI(generics.GenericAPIView):
                 dateupdated = str(datetime.utcnow())
                 auth_key = ''
                 no_of_tickets_posted = 0
+                
+                is_image_upload = request.FILES['profile_picture'] if 'profile_picture' in request.FILES else False
+
+                if is_image_upload == False:
+                    path = ''
+                else:
+                    profile_picture = request.FILES['profile_picture']
+                    actual_filename = request.FILES['profile_picture'].name
+                    uploaded_filename = str(datetime.utcnow().strftime('%Y%m%d%H%M%S')) + "_" + actual_filename
+                    uploaded_filepath = 'documents/profile_pictures/'+ str(datetime.utcnow().year) + '/' + str(datetime.utcnow().month) + '/' + str(datetime.utcnow().day) + '/' + uploaded_filename
+                    path = default_storage.save(uploaded_filepath, ContentFile(profile_picture.read()))
 
                 cursor = connection.cursor()
-                cursor.execute("INSERT INTO user_profile(name,email,password,preference,profile_type,mobile,city,state,country,subscription_type,datecreated,dateupdated,auth_key,no_of_tickets_posted) values(%s , %s ,%s , %s ,%s , %s ,%s , %s ,%s , %s ,%s , %s ,%s, %s) RETURNING user_id",[name, email, password, preference, profile_type, mobile, city, state, country, subscription_type, datecreated, dateupdated, auth_key, no_of_tickets_posted])
-                
+                cursor.execute("INSERT INTO user_profile(name,email,password,preference,profile_type,mobile,city,state,country,subscription_type,datecreated,dateupdated,auth_key,no_of_tickets_posted,profile_picture) values(%s , %s ,%s , %s ,%s , %s ,%s , %s ,%s , %s ,%s , %s ,%s, %s, %s) RETURNING user_id",[name, email, password, preference, profile_type, mobile, city, state, country, subscription_type, datecreated, dateupdated, auth_key, no_of_tickets_posted,path])
+
                 if cursor.rowcount >= 1:
                     rows = cursor.fetchall()
                     for row in rows:
@@ -118,7 +132,7 @@ class ViewProfileAPI(APIView):
                 auth_key = request.GET.get('auth_key')
 
                 cursor = connection.cursor()
-                cursor.execute("SELECT name,email,preference,profile_type,mobile,city,state,country,subscription_type,no_of_tickets_posted,datecreated FROM user_profile WHERE user_id = %s and auth_key = %s",[user_id, auth_key])
+                cursor.execute("SELECT name,email,preference,profile_type,mobile,city,state,country,subscription_type,no_of_tickets_posted,datecreated,profile_picture FROM user_profile WHERE user_id = %s and auth_key = %s",[user_id, auth_key])
 
                 if cursor.rowcount >= 1:
                     rows = cursor.fetchall()
@@ -139,7 +153,8 @@ class ViewProfileAPI(APIView):
                         current_date = datetime.strptime(str(str(datetime.utcnow().date())), '%Y-%m-%d')
                         r = relativedelta.relativedelta(current_date, date1)
                         member_since = str(r.years) + " Years " + str(r.months) + " Months " + str(r.days) + " Days"
-                    
+                        profile_picture = row[11]
+
                     data = {
                                 'name': name,
                                 'email': email,
@@ -152,13 +167,79 @@ class ViewProfileAPI(APIView):
                                 'subscription_type': subscription_type,
                                 'no_of_tickets_posted': no_of_tickets_posted,
                                 'datecreated': datecreated,
-                                'member_since': member_since
+                                'member_since': member_since,
+                                'profile_picture': profile_picture
                             }
                     return Response(data)
                 else:
                     return Response({"response":"User does not exist OR Incorrect query params"})
             else:
                     return Response({"response":"Incorrect number of Query parameters"})
+        
+        except Exception as e: 
+            return Response({"response":"Error while getting profile info", "stacktrace":e.args[0]})
+
+# ViewOtherProfile API
+class ViewOtherProfileAPI(APIView):
+    serializer_class = ViewProfileSerializer
+    
+    def get(self, request):
+        try:
+            if request.GET.get('user_id') and request.GET.get('name') and request.GET.get('auth_key') and request.GET.get('other_user_id'):
+                user_id = request.GET.get('user_id')
+                name = request.GET.get('name')
+                auth_key = request.GET.get('auth_key')
+                other_user_id = request.GET.get('other_user_id')
+
+                cursor = connection.cursor()
+                cursor.execute("SELECT user_id FROM user_profile WHERE user_id = %s and auth_key = %s",[user_id, auth_key])
+                
+                if cursor.rowcount >= 1:
+                    cursor.execute("SELECT name,email,preference,profile_type,mobile,city,state,country,subscription_type,no_of_tickets_posted,datecreated,profile_picture FROM user_profile WHERE user_id = %s",[other_user_id])
+
+                    if cursor.rowcount >= 1:
+                        rows = cursor.fetchall()
+                        for row in rows:
+                            name = row[0]
+                            email = row[1]
+                            preference = row[2]
+                            profile_type = row[3]
+                            mobile = row[4]
+                            city = row[5]
+                            state = row[6]
+                            country = row[7]    
+                            subscription_type = row[8]
+                            no_of_tickets_posted = row[9]
+                            datecreated = str(row[10].strftime('%Y-%m-%d %H:%M:%S'))
+                            
+                            date1 = datetime.strptime(str(datecreated), '%Y-%m-%d %H:%M:%S')
+                            current_date = datetime.strptime(str(str(datetime.utcnow().date())), '%Y-%m-%d')
+                            r = relativedelta.relativedelta(current_date, date1)
+                            member_since = str(r.years) + " Years " + str(r.months) + " Months " + str(r.days) + " Days"
+                            profile_picture = row[11]
+
+                        data = {
+                                    'name': name,
+                                    'email': email,
+                                    'preference': preference,
+                                    'profile_type': profile_type,
+                                    'mobile': mobile,
+                                    'city': city,
+                                    'state': state,
+                                    'country': country,
+                                    'subscription_type': subscription_type,
+                                    'no_of_tickets_posted': no_of_tickets_posted,
+                                    'datecreated': datecreated,
+                                    'member_since': member_since,
+                                    'profile_picture': profile_picture
+                                }
+                        return Response(data)
+                    else:
+                        return Response({"response":"User does not exist OR Incorrect query params"})
+                else:
+                        return Response({"response":"Invalid User details"})
+            else:
+                        return Response({"response":"Incorrect Query parameters"})
         
         except Exception as e: 
             return Response({"response":"Error while getting profile info", "stacktrace":e.args[0]})
@@ -183,13 +264,24 @@ class EditProfile(generics.GenericAPIView):
                 country = request.data['country']
                 subscription_type = request.data['subscription_type']
                 dateupdated = str(datetime.utcnow())
+
+                is_image_upload = request.FILES['profile_picture'] if 'profile_picture' in request.FILES else False
+
+                if is_image_upload == False:
+                    path = ''
+                else:
+                    profile_picture = request.FILES['profile_picture']
+                    actual_filename = request.FILES['profile_picture'].name
+                    uploaded_filename = str(datetime.utcnow().strftime('%Y%m%d%H%M%S')) + "_" + actual_filename
+                    uploaded_filepath = 'documents/profile_pictures/'+ str(datetime.utcnow().year) + '/' + str(datetime.utcnow().month) + '/' + str(datetime.utcnow().day) + '/' + uploaded_filename
+                    path = default_storage.save(uploaded_filepath, ContentFile(profile_picture.read()))
                 
                 cursor = connection.cursor()
                 cursor.execute("SELECT user_id FROM user_profile WHERE user_id = %s and auth_key = %s",[user_id, auth_key])
                 #cursor.execute("INSERT INTO user_profile(name,email,password,preference,profile_type,mobile,city,state,country,subscription_type,datecreated,dateupdated,auth_key) values(%s , %s ,%s , %s ,%s , %s ,%s , %s ,%s , %s ,%s , %s ,%s) RETURNING user_id",[name, email, password, preference, profile_type, mobile, city, state, country, subscription_type, datecreated, dateupdated, auth_key])
                 
                 if cursor.rowcount >= 1:
-                    cursor.execute("UPDATE user_profile SET name = %s, email = %s, preference = %s, profile_type = %s, mobile = %s, city = %s, state = %s, country = %s, subscription_type = %s, dateupdated = %s WHERE user_id = %s RETURNING user_id",[name, email, preference, profile_type, mobile, city, state, country, subscription_type, dateupdated, user_id])
+                    cursor.execute("UPDATE user_profile SET name = %s, email = %s, preference = %s, profile_type = %s, mobile = %s, city = %s, state = %s, country = %s, subscription_type = %s, dateupdated = %s, profile_picture = %s WHERE user_id = %s RETURNING user_id",[name, email, preference, profile_type, mobile, city, state, country, subscription_type, dateupdated, path, user_id])
                     rows = cursor.fetchall()
                     for row in rows:
                         user_id = row[0]

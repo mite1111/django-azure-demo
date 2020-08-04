@@ -34,12 +34,23 @@ class PostTicketAPI(generics.GenericAPIView):
                 ticket_type = request.data['ticket_type']
                 datecreated = str(datetime.utcnow())
                 dateupdated = str(datetime.utcnow())
+
+                is_image_upload = request.FILES['ticket_picture'] if 'ticket_picture' in request.FILES else False
+
+                if is_image_upload == False:
+                    path = ''
+                else:
+                    ticket_picture = request.FILES['ticket_picture']
+                    actual_filename = request.FILES['ticket_picture'].name
+                    uploaded_filename = str(datetime.utcnow().strftime('%Y%m%d%H%M%S')) + "_" + actual_filename
+                    uploaded_filepath = 'documents/ticket_pictures/'+ str(datetime.utcnow().year) + '/' + str(datetime.utcnow().month) + '/' + str(datetime.utcnow().day) + '/' + uploaded_filename
+                    path = default_storage.save(uploaded_filepath, ContentFile(profile_picture.read()))
                 
                 cursor = connection.cursor()
                 cursor.execute("SELECT user_id FROM user_profile WHERE user_id = %s and auth_key = %s",[user_id, auth_key])
                 
                 if cursor.rowcount >= 1:
-                    cursor.execute("INSERT INTO ticket_Details(category,subcategory,product,expiring_in_hours,budget_in_rs,scope,ticket_description,user_id,datecreated,dateupdated,interests_count,ticket_type) values(%s , %s , %s ,%s , %s ,%s , %s ,%s , %s ,%s, %s, %s) RETURNING ticket_id",[category,subcategory,product,expiring_in_hours,budget_in_rs,scope,ticket_description,user_id,datecreated,dateupdated,interests_count,ticket_type])
+                    cursor.execute("INSERT INTO ticket_Details(category,subcategory,product,expiring_in_hours,budget_in_rs,scope,ticket_description,user_id,datecreated,dateupdated,interests_count,ticket_type,ticket_picture) values(%s , %s , %s ,%s , %s ,%s , %s ,%s , %s ,%s, %s, %s, %s) RETURNING ticket_id",[category,subcategory,product,expiring_in_hours,budget_in_rs,scope,ticket_description,user_id,datecreated,dateupdated,interests_count,ticket_type,path])
                     rows = cursor.fetchall()
                     cursor.execute("UPDATE user_profile SET no_of_tickets_posted = (no_of_tickets_posted + 1) WHERE user_id = %s",[user_id])
                     for row in rows:
@@ -64,7 +75,7 @@ class PostTicketAPI(generics.GenericAPIView):
         
         except Exception as e: 
             return Response({"response":"Error saving ticket info", "stacktrace":e.args[0]})
-
+        
 
 #GetMyTickets API
 class GetMyTicketsAPI(APIView):
@@ -81,11 +92,11 @@ class GetMyTicketsAPI(APIView):
                 cursor.execute("SELECT user_id FROM user_profile WHERE user_id = %s and auth_key = %s",[user_id, auth_key])
 
                 if cursor.rowcount >= 1:
-                    cursor.execute("SELECT ticket_id,category,subcategory,product,expiring_in_hours,budget_in_rs,scope,ticket_description,datecreated,interests_count,ticket_type FROM ticket_details WHERE user_id = %s ORDER BY ticket_id DESC",[user_id])
+                    cursor.execute("SELECT ticket_id,category,subcategory,product,expiring_in_hours,budget_in_rs,scope,ticket_description,datecreated,interests_count,ticket_type,ticket_picture FROM ticket_details WHERE user_id = %s ORDER BY ticket_id DESC",[user_id])
                     rows = cursor.fetchall()
                     rowarray_list = []
                     for row in rows:
-                        t = (str(row[0]), row[1], row[2], row[3], row[4], row[5], row[6], row[7], str(row[8]),row[9],row[10])
+                        t = (str(row[0]), row[1], row[2], row[3], row[4], row[5], row[6], row[7], str(row[8]),row[9],row[10],row[11])
                         rowarray_list.append(t)
                     j = json.dumps(rowarray_list)
                     
@@ -113,6 +124,7 @@ class GetMyTicketsAPI(APIView):
                         else:
                             d['user_ticket_interest'] = False
                         
+                        d['ticket_picture'] = row[11]
                         objects_list.append(d)
 
                     j = json.dumps(objects_list)
@@ -142,11 +154,11 @@ class GetTicketById(APIView):
                 cursor.execute("SELECT user_id FROM user_profile WHERE user_id = %s and auth_key = %s",[user_id, auth_key])
 
                 if cursor.rowcount >= 1:
-                    cursor.execute("SELECT ticket_id,category,subcategory,product,expiring_in_hours,budget_in_rs,scope,ticket_description,datecreated,interests_count,ticket_type FROM ticket_details WHERE ticket_id = %s",[ticket_id])
+                    cursor.execute("SELECT ticket_id,category,subcategory,product,expiring_in_hours,budget_in_rs,scope,ticket_description,datecreated,interests_count,ticket_type,ticket_picture FROM ticket_details WHERE ticket_id = %s",[ticket_id])
                     rows = cursor.fetchall()
                     rowarray_list = []
                     for row in rows:
-                        t = (str(row[0]), row[1], row[2], row[3], row[4], row[5], row[6], row[7], str(row[8]),row[9],row[10])
+                        t = (str(row[0]), row[1], row[2], row[3], row[4], row[5], row[6], row[7], str(row[8]),row[9],row[10],row[11])
                         rowarray_list.append(t)
                     j = json.dumps(rowarray_list)
                     
@@ -173,7 +185,8 @@ class GetTicketById(APIView):
                             d['user_ticket_interest'] = True
                         else:
                             d['user_ticket_interest'] = False
-                        
+                        d['ticket_picture'] = row[11]
+
                         objects_list.append(d)
 
                     j = json.dumps(objects_list)
@@ -202,11 +215,11 @@ class GetTicketByHashtag(APIView):
                 cursor.execute("SELECT user_id FROM user_profile WHERE user_id = %s and auth_key = %s",[user_id, auth_key])
 
                 if cursor.rowcount >= 1:
-                    cursor.execute("SELECT tc.ticket_id,tc.category,tc.subcategory,tc.product,tc.expiring_in_hours,tc.budget_in_rs,tc.scope,tc.ticket_description,tc.datecreated,tc.interests_count,tc.ticket_type FROM ticket_details tc JOIN ticket_hashtag ht ON tc.ticket_id = ht.ticket_id WHERE ht.hashtag = %s AND ht.active = 1 ORDER BY tc.ticket_id DESC",[hashtag])
+                    cursor.execute("SELECT tc.ticket_id,tc.category,tc.subcategory,tc.product,tc.expiring_in_hours,tc.budget_in_rs,tc.scope,tc.ticket_description,tc.datecreated,tc.interests_count,tc.ticket_type,tc.ticket_picture FROM ticket_details tc JOIN ticket_hashtag ht ON tc.ticket_id = ht.ticket_id WHERE ht.hashtag = %s AND ht.active = 1 ORDER BY tc.ticket_id DESC",[hashtag])
                     rows = cursor.fetchall()
                     rowarray_list = []
                     for row in rows:
-                        t = (str(row[0]), row[1], row[2], row[3], row[4], row[5], row[6], row[7], str(row[8]),row[9],row[10])
+                        t = (str(row[0]), row[1], row[2], row[3], row[4], row[5], row[6], row[7], str(row[8]),row[9],row[10],row[11])
                         rowarray_list.append(t)
                     j = json.dumps(rowarray_list)
                     
@@ -233,7 +246,8 @@ class GetTicketByHashtag(APIView):
                             d['user_ticket_interest'] = True
                         else:
                             d['user_ticket_interest'] = False
-                        
+                        d['ticket_picture'] = row[11]
+
                         objects_list.append(d)
 
                     j = json.dumps(objects_list)
@@ -262,11 +276,11 @@ class GetFewTicketByHashtag(APIView):
                 cursor.execute("SELECT user_id FROM user_profile WHERE user_id = %s and auth_key = %s",[user_id, auth_key])
 
                 if cursor.rowcount >= 1:
-                    cursor.execute("SELECT tc.ticket_id,tc.category,tc.subcategory,tc.product,tc.expiring_in_hours,tc.budget_in_rs,tc.scope,tc.ticket_description,tc.datecreated,tc.interests_count,tc.ticket_type FROM ticket_details tc JOIN ticket_hashtag ht ON tc.ticket_id = ht.ticket_id WHERE ht.hashtag = %s ORDER BY tc.ticket_id DESC LIMIT 10",[hashtag])
+                    cursor.execute("SELECT tc.ticket_id,tc.category,tc.subcategory,tc.product,tc.expiring_in_hours,tc.budget_in_rs,tc.scope,tc.ticket_description,tc.datecreated,tc.interests_count,tc.ticket_type,tc.ticket_picture FROM ticket_details tc JOIN ticket_hashtag ht ON tc.ticket_id = ht.ticket_id WHERE ht.hashtag = %s ORDER BY tc.ticket_id DESC LIMIT 10",[hashtag])
                     rows = cursor.fetchall()
                     rowarray_list = []
                     for row in rows:
-                        t = (str(row[0]), row[1], row[2], row[3], row[4], row[5], row[6], row[7], str(row[8]),row[9],row[10])
+                        t = (str(row[0]), row[1], row[2], row[3], row[4], row[5], row[6], row[7], str(row[8]),row[9],row[10],row[11])
                         rowarray_list.append(t)
                     j = json.dumps(rowarray_list)
                     
@@ -293,6 +307,7 @@ class GetFewTicketByHashtag(APIView):
                             d['user_ticket_interest'] = True
                         else:
                             d['user_ticket_interest'] = False
+                        d['ticket_picture'] = row[11]
 
                         objects_list.append(d)
 
@@ -327,11 +342,22 @@ class EditTicketAPI(generics.GenericAPIView):
                 ticket_description = request.data['ticket_description']
                 dateupdated = str(datetime.utcnow())
 
+                is_image_upload = request.FILES['ticket_picture'] if 'ticket_picture' in request.FILES else False
+
+                if is_image_upload == False:
+                    path = ''
+                else:
+                    ticket_picture = request.FILES['ticket_picture']
+                    actual_filename = request.FILES['ticket_picture'].name
+                    uploaded_filename = str(datetime.utcnow().strftime('%Y%m%d%H%M%S')) + "_" + actual_filename
+                    uploaded_filepath = 'documents/ticket_pictures/'+ str(datetime.utcnow().year) + '/' + str(datetime.utcnow().month) + '/' + str(datetime.utcnow().day) + '/' + uploaded_filename
+                    path = default_storage.save(uploaded_filepath, ContentFile(profile_picture.read()))
+
                 cursor = connection.cursor()
                 cursor.execute("SELECT user_id FROM user_profile WHERE user_id = %s and auth_key = %s",[user_id, auth_key])
                 
                 if cursor.rowcount >= 1:
-                    cursor.execute("UPDATE ticket_Details SET category = %s, subcategory = %s, product = %s, budget_in_rs = %s, scope = %s, ticket_description = %s, dateupdated = %s WHERE user_id = %s AND ticket_id = %s RETURNING ticket_id",[category, subcategory, product, budget_in_rs, scope, ticket_description, dateupdated, user_id, ticket_id])
+                    cursor.execute("UPDATE ticket_Details SET category = %s, subcategory = %s, product = %s, budget_in_rs = %s, scope = %s, ticket_description = %s, dateupdated = %s, ticket_picture = %s WHERE user_id = %s AND ticket_id = %s RETURNING ticket_id",[category, subcategory, product, budget_in_rs, scope, ticket_description, dateupdated, path, user_id, ticket_id])
                     rows = cursor.fetchall()
                     for row in rows:
                         ticket_id = row[0]
@@ -387,11 +413,11 @@ class GetTicketsByMultipleHashtags(generics.GenericAPIView):
                     # hashtag_list = data['hashtags']
                     # print(data)
 
-                    cursor.execute("SELECT tc.ticket_id,tc.category,tc.subcategory,tc.product,tc.expiring_in_hours,tc.budget_in_rs,tc.scope,tc.ticket_description,tc.datecreated,tc.interests_count,tc.ticket_type FROM ticket_details tc JOIN ticket_hashtag ht ON tc.ticket_id = ht.ticket_id WHERE ht.hashtag = ANY (%s) AND ht.active = 1 ORDER BY tc.ticket_id DESC LIMIT 20",[hashtag_array])
+                    cursor.execute("SELECT tc.ticket_id,tc.category,tc.subcategory,tc.product,tc.expiring_in_hours,tc.budget_in_rs,tc.scope,tc.ticket_description,tc.datecreated,tc.interests_count,tc.ticket_type,tc.ticket_picture FROM ticket_details tc JOIN ticket_hashtag ht ON tc.ticket_id = ht.ticket_id WHERE ht.hashtag = ANY (%s) AND ht.active = 1 ORDER BY tc.ticket_id DESC LIMIT 20",[hashtag_array])
                     rows = cursor.fetchall()
                     rowarray_list = []
                     for row in rows:
-                        t = (str(row[0]), row[1], row[2], row[3], row[4], row[5], row[6], row[7], str(row[8]),row[9],row[10])
+                        t = (str(row[0]), row[1], row[2], row[3], row[4], row[5], row[6], row[7], str(row[8]),row[9],row[10],row[11])
                         rowarray_list.append(t)
                     j = json.dumps(rowarray_list)
                     
@@ -418,7 +444,8 @@ class GetTicketsByMultipleHashtags(generics.GenericAPIView):
                             d['user_ticket_interest'] = True
                         else:
                             d['user_ticket_interest'] = False
-                        
+                        d['ticket_picture'] = row[11]
+
                         objects_list.append(d)
 
                     j = json.dumps(objects_list)
