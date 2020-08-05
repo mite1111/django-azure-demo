@@ -11,6 +11,9 @@ import uuid
 from datetime import datetime
 from django.http import JsonResponse
 import collections
+from dateutil import relativedelta
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 #PostTicket API
 class PostTicketAPI(generics.GenericAPIView):
