@@ -159,8 +159,11 @@ class RemoveInterestByTicketId(generics.GenericAPIView):
                 cursor.execute("SELECT user_id FROM user_profile WHERE user_id = %s and auth_key = %s",[user_id, auth_key])
                 
                 if cursor.rowcount >= 1:
-                    cursor.execute("DELETE FROM allinterests WHERE user_id = %s and ticket_id = %s RETURNING ticket_id",[user_id, ticket_id])
+                    cursor.execute("SELECT user_id FROM allinterests WHERE user_id = %s and ticket_id = %s",[user_id, ticket_id])
                     if cursor.rowcount >= 1:
+                        cursor.execute("DELETE FROM allinterests WHERE user_id = %s and ticket_id = %s",[user_id, ticket_id])
+                        cursor.execute("UPDATE ticket_Details SET interests_count = (interests_count - 1) WHERE ticket_id = %s",[ticket_id])
+                    
                         data = {
                                 'ticket_id': ticket_id,
                                 'response': 'Interest removed successfully'
