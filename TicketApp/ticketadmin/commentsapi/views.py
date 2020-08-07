@@ -37,6 +37,8 @@ class PostCommentAPI(generics.GenericAPIView):
                     data = {
                             'cid': cid
                             }
+                    cursor.close()
+                    connection.close()
                     return Response(data)
                 else:
                     return Response({"response":"Error saving comments"})
@@ -79,6 +81,8 @@ class GetCommentsByUserId(APIView):
                         objects_list.append(d)
 
                     j = json.dumps(objects_list)
+                    cursor.close()
+                    connection.close()
                     return HttpResponse(j, content_type = "application/json")
                 else:
                     return Response({"response":"User does not exist OR Incorrect query params"})
@@ -126,6 +130,8 @@ class GetCommentsByTicketId(APIView):
                         objects_list.append(d)
 
                     j = json.dumps(objects_list)
+                    cursor.close()
+                    connection.close()
                     return HttpResponse(j, content_type = "application/json")
                 else:
                     return Response({"response":"User does not exist OR Incorrect query params"})

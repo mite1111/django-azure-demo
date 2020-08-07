@@ -68,6 +68,9 @@ class RegisterAPI(generics.GenericAPIView):
                     data = {
                             'user_id': user_id
                             }
+                    cursor.close()
+                    connection.close()
+
                     return Response(data)
                 else:
                     return Response({"response":"Error saving user info"})
@@ -111,6 +114,10 @@ class LoginAPI(generics.GenericAPIView):
                                 'mobile': mobile,
                                 'auth_key': auth_key
                                 }
+                        
+                        cursor.close()
+                        connection.close()
+                        
                         return Response(data)
                     else:
                         return Response({"response":"Incorrect Credentials"})
@@ -170,6 +177,10 @@ class ViewProfileAPI(APIView):
                                 'member_since': member_since,
                                 'profile_picture': profile_picture
                             }
+                   
+                    cursor.close()
+                    connection.close()
+
                     return Response(data)
                 else:
                     return Response({"response":"User does not exist OR Incorrect query params"})
@@ -233,6 +244,9 @@ class ViewOtherProfileAPI(APIView):
                                     'member_since': member_since,
                                     'profile_picture': profile_picture
                                 }
+                        cursor.close()
+                        connection.close()
+                        
                         return Response(data)
                     else:
                         return Response({"response":"User does not exist OR Incorrect query params"})
@@ -288,6 +302,10 @@ class EditProfile(generics.GenericAPIView):
                     data = {
                             'user_id': user_id
                             }
+                    
+                    cursor.close()
+                    connection.close()
+
                     return Response(data)
                 else:
                     return Response({"response":"Error while updating user info"})
@@ -323,6 +341,10 @@ class ChangePassword(generics.GenericAPIView):
                         data = {
                                 'user_id': user_id
                                 }
+                        
+                        cursor.close()
+                        connection.close()
+
                         return Response(data)
                     else:
                         return Response({"response":"Incorrect Old Password"})

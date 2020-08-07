@@ -39,6 +39,9 @@ class PostInterestAPI(generics.GenericAPIView):
                         data = {
                                 'intid': intid
                                 }
+                        cursor.close()
+                        connection.close()
+
                         return Response(data)
                     else:
                         return Response({"response":"Interest record already exists for ticket_id and user_id combination"})
@@ -82,6 +85,8 @@ class GetInterestsByUserid(APIView):
                         objects_list.append(d)
 
                     j = json.dumps(objects_list)
+                    cursor.close()
+                    connection.close()
                     return HttpResponse(j, content_type = "application/json")
                 else:
                     return Response({"response":"User does not exist OR Incorrect query params"})
@@ -128,6 +133,8 @@ class GetInterestsByTicketId(APIView):
                         objects_list.append(d)
 
                     j = json.dumps(objects_list)
+                    cursor.close()
+                    connection.close()
                     return HttpResponse(j, content_type = "application/json")
                 else:
                     return Response({"response":"User does not exist OR Incorrect query params"})
@@ -158,6 +165,9 @@ class RemoveInterestByTicketId(generics.GenericAPIView):
                                 'ticket_id': ticket_id,
                                 'response': 'Interest removed successfully'
                                 }
+                        
+                        cursor.close()
+                        connection.close()
                         return Response(data)
                     else:
                         return Response({"response":"Interest not found for given user_id and ticket_id combination"})

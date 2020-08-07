@@ -72,6 +72,9 @@ class PostTicketAPI(generics.GenericAPIView):
                     data = {
                             'ticket_id': ticket_id
                             }
+                    cursor.close()
+                    connection.close()
+
                     return Response(data)
                 else:
                     return Response({"response":"Error saving ticket info"})
@@ -131,6 +134,10 @@ class GetMyTicketsAPI(APIView):
                         objects_list.append(d)
 
                     j = json.dumps(objects_list)
+
+                    cursor.close()
+                    connection.close()
+
                     return HttpResponse(j, content_type = "application/json")
                 else:
                     return Response({"response":"User does not exist OR Incorrect query params"})
@@ -191,6 +198,9 @@ class GetTicketById(APIView):
                         d['ticket_picture'] = row[11]
 
                         objects_list.append(d)
+                    
+                    cursor.close()
+                    connection.close()
 
                     j = json.dumps(objects_list)
                     return HttpResponse(j, content_type = "application/json")
@@ -252,6 +262,9 @@ class GetTicketByHashtag(APIView):
                         d['ticket_picture'] = row[11]
 
                         objects_list.append(d)
+                    
+                    cursor.close()
+                    connection.close()
 
                     j = json.dumps(objects_list)
                     return HttpResponse(j, content_type = "application/json")
@@ -315,6 +328,10 @@ class GetFewTicketByHashtag(APIView):
                         objects_list.append(d)
 
                     j = json.dumps(objects_list)
+                    
+                    cursor.close()
+                    connection.close()
+
                     return HttpResponse(j, content_type = "application/json")
                 else:
                     return Response({"response":"User does not exist OR Incorrect query params"})
@@ -387,6 +404,10 @@ class EditTicketAPI(generics.GenericAPIView):
                     data = {
                             'ticket_id': ticket_id
                             }
+                            
+                    cursor.close()
+                    connection.close()
+
                     return Response(data)
                 else:
                     return Response({"response":"Error while updating ticket info"})
@@ -454,7 +475,9 @@ class GetTicketsByMultipleHashtags(generics.GenericAPIView):
 
                     j = json.dumps(objects_list)
                     
-                    return Response(j)
+                    cursor.close()
+                    connection.close()
+                    return HttpResponse(j)
                 else:
                     return Response({"response":"User does not exist OR Incorrect query params"})
             else:
