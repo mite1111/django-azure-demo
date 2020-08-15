@@ -15,7 +15,7 @@ from dateutil import relativedelta
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
-#PostTicket API
+#PostTickets API
 class PostTicketAPI(generics.GenericAPIView):
     serializer_class = PostTicketSerializer
 
